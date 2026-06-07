@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — Segunda Opinião Radiológica</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#F8FAFC;color:#0F172A}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+#root{min-height:100vh}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line } = Recharts;
+
+const SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIqIG3zTLcnsJsXQ3BLpAEdOyE4qbwdPptdX5K2oK2iko11XhNDQnK4Ea3kU0j1IUJG5I7WaMD5F4y/pub?output=csv";
+const REFRESH_MS = 60000;
+
+const COLORS = {blue:"#3B82F6",coral:"#EF4444",purple:"#8B5CF6",teal:"#0D9488",amber:"#F59E0B",pink:"#EC4899",green:"#10B981",slate:"#64748B"};
+const PALETTE = ["#3B82F6","#EF4444","#8B5CF6","#0D9488","#F59E0B","#EC4899","#10B981","#64748B","#6366F1","#F97316"];
+
+const countFn = (arr, fn) => {
+  const m = {};
+  arr.forEach(r => {
+    const v = fn(r);
+    if (!v) return;
+    v.split(/[;,]/).map(s => s.trim()).filter(Boolean).forEach(k => { m[k] = (m[k]||0)+1; });
+  });
+  return Object.entries(m).map(([name,value])=>({name:name.substring(0,30),value})).sort((a,b)=>b.value-a.value);
+};
+
+const KPI = ({label,value,sub,color}) => (
+  <div style={{background:"#F8FAFC",borderRadius:8,padding:"10px 14px",borderLeft:`3px solid ${color||COLORS.blue}`,flex:1,minWidth:100}}>
+    <div style={{fontSize:10,color:"#94A3B8",fontWeight:500,letterSpacing:".4px",textTransform:"uppercase"}}>{label}</div>
+    <div style={{fontSize:24,fontWeight:600,color:"#0F172A",marginTop:2}}>{value}</div>
+    {sub && <div style={{fontSize:10,color:"#94A3B8",marginTop:1}}>{sub}</div>}
+  </div>
+);
+
+const Section = ({label}) => (
+  <div style={{display:"flex",alignItems:"center",gap:6,marginTop:14,marginBottom:6}}>
+    <div style={{width:3,height:12,borderRadius:2,background:"#CBD5E1"}}/>
+    <span style={{fontSize:10,color:"#94A3B8",fontWeight:500,letterSpacing:".4px",textTransform:"uppercase"}}>{label}</span>
+  </div>
+);
+
+const MiniBar = ({data,color}) => (
+  <ResponsiveContainer width="100%" height={Math.max(data.length*28,50)}>
+    <BarChart data={data} layout="vertical" margin={{top:0,right:10,left:0,bottom:0}} barSize={14}>
+      <XAxis type="number" hide/>
+      <YAxis type="category" dataKey="name" width={140} tick={{fontSize:10,fill:"#64748B"}} axisLine={false} tickLine={false}/>
+      <Tooltip contentStyle={{fontSize:11,borderRadius:6,border:"1px solid #E2E8F0"}}/>
+      <Bar dataKey="value" radius={[0,4,4,0]}>
+        {data.map((_,i) => <Cell key={i} fill={i<2?(color||COLORS.blue):"#CBD5E1"} opacity={i<2?0.85:0.4}/>)}
+      </Bar>
+    </BarChart>
+  </ResponsiveContainer>
+);
+
+const Card = ({num,title,subtitle,color,icon,children}) => (
+  <div style={{background:"#FFF",borderRadius:12,border:"1px solid #E2E8F0",boxShadow:"0 1px 3px rgba(15,23,42,0.04)",padding:16,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+      <div style={{width:30,height:30,borderRadius:"50%",background:color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,color:"#FFF",flexShrink:0}}>{num}</div>
+      <div style={{flex:1}}>
+        <div style={{fontSize:14,fontWeight:700,color:"#0F172A"}}>{title}</div>
+        <div style={{fontSize:10,color:color,fontWeight:500}}>{subtitle}</div>
+      </div>
+      <span style={{fontSize:18}}>{icon}</span>
+    </div>
+    {children}
+  </div>
+);
+
+const HeatCell = ({val,max}) => {
+  const o = max>0?val/max:0;
+  return <div style={{flex:1,height:24,borderRadius:4,background:`rgba(59,130,246,${Math.max(o*0.8,0.05)})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:500,color:o>0.5?"#FFF":"#64748B"}}>{val||""}</div>;
+};
+
+function Dashboard() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdate, setLastUpdate] = useState(null);
+
+  const fetchData = () => {
+    Papa.parse(SHEET_CSV, {
+      download: true,
+      header: false,
+      skipEmptyLines: true,
+      complete: (r) => {
+        if (r.data && r.data.length >= 2) {
+          setRows(r.data);
+          setLastUpdate(new Date());
+          setError(null);
+        }
+        setLoading(false);
+      },
+      error: (e) => {
+        setError(e.message || "Erro ao carregar dados");
+        setLoading(false);
+      }
+    });
+  };
+
+  useEffect(() => {
+    fetchData();
+    const t = setInterval(fetchData, REFRESH_MS);
+    return () => clearInterval(t);
+  }, []);
+
+  const data = useMemo(() => {
+    if (rows.length < 2) return null;
+    const headers = rows[0];
+    const records = rows.slice(1).filter(r => r.some(c => c && c.trim()));
+    if (!records.length) return null;
+
+    const findCol = (keyword) => {
+      const idx = headers.findIndex(h => h && h.toLowerCase().includes(keyword.toLowerCase()));
+      return idx >= 0 ? idx : -1;
+    };
+
+    const iProfile = findCol("perfil médico") >= 0 ? findCol("perfil médico") : findCol("perfil") >= 0 ? findCol("perfil") : 1;
+    const iEnv = findCol("ambiente") >= 0 ? findCol("ambiente") : 3;
+    const iGrad = findCol("graduação") >= 0 ? findCol("graduação") : findCol("preparou") >= 0 ? findCol("preparou") : 5;
+    const iFreq = findCol("inseguro") >= 0 ? findCol("inseguro") : findCol("frequência") >= 0 ? findCol("frequência") : 6;
+    const iExams = findCol("tipos de exame") >= 0 ? findCol("tipos de exame") : findCol("exame") >= 0 ? findCol("exame") : 7;
+    const iBehavior = findCol("costuma fazer") >= 0 ? findCol("costuma fazer") : findCol("dúvida sobre um exame") >= 0 ? findCol("dúvida sobre um exame") : 8;
+    const iWorry = findCol("preocupação") >= 0 ? findCol("preocupação") : 9;
+    const iCase = findCol("opinião adicional") >= 0 ? findCol("opinião adicional") : findCol("conduta") >= 0 ? findCol("conduta") : 10;
+    const iAction = findCol("diante da dúvida") >= 0 ? findCol("diante da dúvida") : 11;
+    const iDescribe = findCol("Descreva") >= 0 ? findCol("Descreva") : findCol("brevemente") >= 0 ? findCol("brevemente") : 12;
+    const iResolved = findCol("resolveu") >= 0 ? findCol("resolveu") : 13;
+    const iInvests = findCol("investimento") >= 0 ? findCol("investimento") : 14;
+    const iVW1 = findCol("tão barato") >= 0 ? findCol("tão barato") : 16;
+    const iVW2 = findCol("barato, mas") >= 0 ? findCol("barato, mas") : findCol("barato") >= 0 ? findCol("barato") : 17;
+    const iVW3 = findCol("caro, mas") >= 0 ? findCol("caro, mas") : 18;
+    const iVW4 = findCol("tão caro") >= 0 ? findCol("tão caro") : 19;
+    const iBand = findCol("faixa melhor") >= 0 ? findCol("faixa melhor") : findCol("faixa") >= 0 ? findCol("faixa") : 20;
+    const iDeadline = findCol("prazo") >= 0 ? findCol("prazo") : 21;
+    const iUrgency = findCol("pagar a mais") >= 0 ? findCol("pagar a mais") : findCol("urgente") >= 0 ? findCol("urgente") : 22;
+    const iModel = findCol("modelo de cobrança") >= 0 ? findCol("modelo de cobrança") : findCol("cobrança") >= 0 ? findCol("cobrança") : 23;
+    const iIntention = findCol("disponível hoje") >= 0 ? findCol("disponível hoje") : findCol("plataforma estivesse") >= 0 ? findCol("plataforma estivesse") : 24;
+    const iIndispensable = findCol("indispensável") >= 0 ? findCol("indispensável") : 25;
+    const iInterview = findCol("entrevista") >= 0 ? findCol("entrevista") : 26;
+    const iContact = findCol("contato") >= 0 ? findCol("contato") : 27;
+
+    const n = records.length;
+    const profiles = countFn(records, r => r[iProfile]);
+    const environments = countFn(records, r => r[iEnv]);
+    const gradScores = records.map(r => parseFloat(r[iGrad])).filter(v => !isNaN(v));
+    const avgGrad = gradScores.length ? (gradScores.reduce((a,b)=>a+b,0)/gradScores.length).toFixed(1) : "—";
+    const freqs = countFn(records, r => r[iFreq]);
+    const freqHigh = records.filter(r => { const v = (r[iFreq]||"").toLowerCase(); return v.includes("semana") || v.includes("diariamente") || v.includes("diário"); }).length;
+    const caseYes = records.filter(r => (r[iCase]||"").toLowerCase().includes("sim")).length;
+    const exams = countFn(records, r => r[iExams]);
+    const worries = records.map(r => r[iWorry]).filter(Boolean);
+    const behaviors = countFn(records, r => r[iBehavior]);
+    const actions = countFn(records, r => r[iAction]);
+    const stories = records.map(r => ({desc:r[iDescribe],resolved:r[iResolved],profile:r[iProfile]})).filter(s=>s.desc);
+
+    const vw1 = records.map(r => parseFloat(r[iVW1])).filter(v => !isNaN(v)).sort((a,b)=>a-b);
+    const vw2 = records.map(r => parseFloat(r[iVW2])).filter(v => !isNaN(v)).sort((a,b)=>a-b);
+    const vw3 = records.map(r => parseFloat(r[iVW3])).filter(v => !isNaN(v)).sort((a,b)=>a-b);
+    const vw4 = records.map(r => parseFloat(r[iVW4])).filter(v => !isNaN(v)).sort((a,b)=>a-b);
+    const bands = countFn(records, r => r[iBand]);
+    const deadlines = countFn(records, r => r[iDeadline]);
+    const urgencies = countFn(records, r => r[iUrgency]);
+    const models = countFn(records, r => r[iModel]);
+    const investYes = records.filter(r => (r[iInvests]||"").toLowerCase().includes("sim")).length;
+
+    const vwPoints = [];
+    if (vw1.length && vw4.length) {
+      const allVals = [...vw1,...vw2,...vw3,...vw4].sort((a,b)=>a-b);
+      const minV = allVals[0]; const maxV = allVals[allVals.length-1];
+      const step = Math.max(10, Math.round((maxV-minV)/10));
+      for (let p = minV; p <= maxV; p += step) {
+        vwPoints.push({
+          price: "R$"+p,
+          "Barato demais": Math.round(vw1.filter(v=>v>=p).length/vw1.length*100),
+          "Barato ok": Math.round(vw2.filter(v=>v<=p).length/vw2.length*100),
+          "Caro ok": Math.round(vw3.filter(v=>v<=p).length/vw3.length*100),
+          "Caro demais": Math.round(vw4.filter(v=>v<=p).length/vw4.length*100),
+        });
+      }
+    }
+    const optPrice = vw2.length && vw3.length ? "R$"+Math.round((vw2[Math.floor(vw2.length/2)]+vw3[Math.floor(vw3.length/2)])/2) : "—";
+
+    const cross1 = {};
+    records.forEach(r => {
+      const prof = (r[iProfile]||"").substring(0,18);
+      const freq = (r[iFreq]||"").substring(0,18);
+      if (!prof||!freq) return;
+      if (!cross1[prof]) cross1[prof]={};
+      cross1[prof][freq]=(cross1[prof][freq]||0)+1;
+    });
+
+    const intentions = countFn(records, r => r[iIntention]);
+    const indispensables = records.map(r => r[iIndispensable]).filter(Boolean);
+    const contacts = records.filter(r => (r[iInterview]||"").toLowerCase().includes("sim")).map(r => ({contact:r[iContact],profile:r[iProfile],freq:r[iFreq]}));
+
+    return {n,profiles,environments,avgGrad,freqs,freqHigh,caseYes,exams,worries,behaviors,actions,stories,vwPoints,optPrice,bands,deadlines,urgencies,models,investYes,cross1,intentions,indispensables,contacts};
+  }, [rows]);
+
+  if (loading) return (
+    <div style={{height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#64748B"}}>
+      <div style={{textAlign:"center"}}>
+        <div style={{fontSize:36,marginBottom:12}}>📊</div>
+        <div style={{fontSize:14}}>Carregando dados do Google Sheets...</div>
+        <div style={{fontSize:11,color:"#94A3B8",marginTop:6}}>Conectando à planilha publicada</div>
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div style={{height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#EF4444",padding:40,textAlign:"center"}}>
+      <div>
+        <div style={{fontSize:36,marginBottom:12}}>⚠️</div>
+        <div style={{fontSize:14,marginBottom:8}}>Erro ao carregar dados</div>
+        <div style={{fontSize:11,color:"#94A3B8"}}>{error}</div>
+      </div>
+    </div>
+  );
+
+  if (!data) return (
+    <div style={{height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#64748B",textAlign:"center"}}>
+      <div>
+        <div style={{fontSize:36,marginBottom:12}}>📋</div>
+        <div>Sem respostas ainda</div>
+        <div style={{fontSize:11,color:"#94A3B8",marginTop:6}}>Atualiza automaticamente a cada 60s</div>
+      </div>
+    </div>
+  );
+
+  const d = data;
+  const freqPct = d.n>0?Math.round(d.freqHigh/d.n*100):0;
+  const casePct = d.n>0?Math.round(d.caseYes/d.n*100):0;
+  const investPct = d.n>0?Math.round(d.investYes/d.n*100):0;
+  const crossKeys = Object.keys(d.cross1);
+  const crossFreqs = [...new Set(Object.values(d.cross1).flatMap(v=>Object.keys(v)))];
+
+  return (
+    <div>
+      {/* HEADER */}
+      <div style={{background:"#0F172A",padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:10}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:14,fontWeight:700,color:"#FFF",letterSpacing:".5px"}}>SEGUNDA OPINIÃO RADIOLÓGICA</span>
+          <span style={{fontSize:13,color:COLORS.blue,fontWeight:300}}>Dashboard de validação</span>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:16}}>
+          <span style={{fontSize:11,color:"#64748B"}}>{d.n} respostas</span>
+          <span style={{fontSize:10,color:"#475569"}}>Atualiza a cada 60s{lastUpdate ? " · "+lastUpdate.toLocaleTimeString("pt-BR") : ""}</span>
+          <button onClick={fetchData} style={{background:COLORS.blue,color:"#FFF",border:"none",borderRadius:6,padding:"4px 12px",fontSize:10,fontWeight:600,cursor:"pointer"}}>↻ Atualizar</button>
+        </div>
+      </div>
+
+      <div style={{padding:"16px 24px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,maxWidth:1920,margin:"0 auto"}}>
+
+        <Card num="1" title="Quem está respondendo?" subtitle="Perfil do respondente" color={COLORS.blue} icon="👥">
+          <div style={{display:"flex",gap:8}}>
+            <KPI label="Respostas" value={d.n} color={COLORS.blue}/>
+            <KPI label="Perfil top" value={d.profiles[0]?.name||"—"} color={COLORS.blue}/>
+          </div>
+          <Section label="Perfil médico"/>
+          <MiniBar data={d.profiles} color={COLORS.blue}/>
+          <Section label="Ambiente de atuação"/>
+          <MiniBar data={d.environments} color={COLORS.blue}/>
+        </Card>
+
+        <Card num="2" title="A dor é real?" subtitle="Validação da tese central" color={COLORS.coral} icon="🎯">
+          <div style={{display:"flex",gap:8}}>
+            <KPI label="Insegurança freq." value={freqPct+"%"} sub="semanal ou diário" color={COLORS.coral}/>
+            <KPI label="Nota graduação" value={d.avgGrad} sub="escala 1–5" color={COLORS.amber}/>
+            <KPI label="Caso c/ impacto" value={casePct+"%"} sub="disseram sim" color={COLORS.teal}/>
+          </div>
+          <Section label="Frequência de insegurança"/>
+          <MiniBar data={d.freqs} color={COLORS.coral}/>
+          <Section label="Exames com mais dúvida"/>
+          <MiniBar data={d.exams} color={COLORS.amber}/>
+          {d.worries.length > 0 && <React.Fragment>
+            <Section label="Maior preocupação — abertas"/>
+            <div style={{background:"#FFF7ED",borderRadius:6,padding:10,maxHeight:100,overflowY:"auto"}}>
+              {d.worries.slice(0,5).map((w,i) => <div key={i} style={{fontSize:11,color:"#78350F",marginBottom:4,borderBottom:"1px solid #FDE68A",paddingBottom:4}}>"{w}"</div>)}
+            </div>
+          </React.Fragment>}
+        </Card>
+
+        <div style={{gridColumn:"1/3",display:"flex",alignItems:"center",justifyContent:"center",padding:"2px 0"}}>
+          <div style={{width:"60%",height:1,background:"linear-gradient(90deg,transparent,#CBD5E1,transparent)"}}/>
+        </div>
+
+        <Card num="3" title="O que fazem hoje?" subtitle="Mapa de concorrência real" color={COLORS.purple} icon="🔄">
+          <Section label="Comportamento na dúvida"/>
+          <MiniBar data={d.behaviors} color={COLORS.purple}/>
+          {d.actions.length > 0 && <React.Fragment>
+            <Section label="No último caso real"/>
+            <MiniBar data={d.actions} color={COLORS.purple}/>
+          </React.Fragment>}
+          {d.stories.length > 0 && <React.Fragment>
+            <Section label="Relatos reais"/>
+            <div style={{background:"#F5F3FF",borderRadius:6,padding:10,maxHeight:100,overflowY:"auto"}}>
+              {d.stories.slice(0,3).map((s,i) => <div key={i} style={{fontSize:11,color:"#4C1D95",marginBottom:6}}>
+                <strong>{s.profile}:</strong> "{s.desc}" → <em>{s.resolved}</em>
+              </div>)}
+            </div>
+          </React.Fragment>}
+        </Card>
+
+        <Card num="4" title="Quanto pagam?" subtitle="Precificação por dados" color={COLORS.teal} icon="💰">
+          <div style={{display:"flex",gap:8}}>
+            <KPI label="Preço ideal" value={d.optPrice} color={COLORS.teal}/>
+            <KPI label="Já investem" value={investPct+"%"} sub="em ferramentas" color={COLORS.teal}/>
+          </div>
+          {d.vwPoints.length > 0 && <React.Fragment>
+            <Section label="Curva Van Westendorp"/>
+            <ResponsiveContainer width="100%" height={160}>
+              <LineChart data={d.vwPoints} margin={{top:5,right:10,left:0,bottom:5}}>
+                <XAxis dataKey="price" tick={{fontSize:9,fill:"#94A3B8"}} axisLine={false}/>
+                <YAxis tick={{fontSize:9,fill:"#94A3B8"}} axisLine={false} tickFormatter={v=>v+"%"}/>
+                <Tooltip contentStyle={{fontSize:10,borderRadius:6}}/>
+                <Line type="monotone" dataKey="Barato demais" stroke="#EF4444" dot={false} strokeWidth={1.5} strokeDasharray="4 3"/>
+                <Line type="monotone" dataKey="Barato ok" stroke="#10B981" dot={false} strokeWidth={1.5}/>
+                <Line type="monotone" dataKey="Caro ok" stroke="#F59E0B" dot={false} strokeWidth={1.5}/>
+                <Line type="monotone" dataKey="Caro demais" stroke="#991B1B" dot={false} strokeWidth={1.5} strokeDasharray="4 3"/>
+              </LineChart>
+            </ResponsiveContainer>
+          </React.Fragment>}
+          <div style={{display:"flex",gap:8}}>
+            <div style={{flex:1}}><Section label="Faixa validada"/><MiniBar data={d.bands} color={COLORS.teal}/></div>
+            <div style={{flex:1}}><Section label="Urgência"/><MiniBar data={d.urgencies} color={COLORS.coral}/></div>
+          </div>
+          <Section label="Modelo de cobrança"/>
+          <MiniBar data={d.models} color={COLORS.teal}/>
+        </Card>
+
+        <div style={{gridColumn:"1/3",display:"flex",alignItems:"center",justifyContent:"center",padding:"2px 0"}}>
+          <div style={{width:"60%",height:1,background:"linear-gradient(90deg,transparent,#CBD5E1,transparent)"}}/>
+        </div>
+
+        <Card num="5" title="Quem é o cliente ideal?" subtitle="Cruzamentos" color={COLORS.amber} icon="📊">
+          <Section label="Perfil × Frequência de insegurança"/>
+          {crossKeys.length > 0 ? (
+            <div style={{overflowX:"auto"}}>
+              <div style={{display:"flex",gap:3,marginBottom:4}}>
+                <div style={{width:120,flexShrink:0}}/>
+                {crossFreqs.map(f => <div key={f} style={{flex:1,fontSize:8,color:"#94A3B8",textAlign:"center",minWidth:40}}>{f.substring(0,14)}</div>)}
+              </div>
+              {crossKeys.map(prof => {
+                const vals = crossFreqs.map(f => d.cross1[prof][f]||0);
+                const mx = Math.max(...vals,1);
+                return (
+                  <div key={prof} style={{display:"flex",gap:3,marginBottom:3}}>
+                    <div style={{width:120,flexShrink:0,fontSize:9,color:"#64748B",display:"flex",alignItems:"center"}}>{prof}</div>
+                    {vals.map((v,i) => <HeatCell key={i} val={v} max={mx}/>)}
+                  </div>
+                );
+              })}
+            </div>
+          ) : <div style={{fontSize:11,color:"#94A3B8",padding:20,textAlign:"center"}}>Dados insuficientes para cruzamento</div>}
+          <Section label="Prazo aceitável"/>
+          <MiniBar data={d.deadlines} color={COLORS.amber}/>
+        </Card>
+
+        <Card num="6" title="O que fazer agora?" subtitle="Pipeline e decisão" color={COLORS.pink} icon="🚀">
+          <Section label="Intenção de uso"/>
+          <MiniBar data={d.intentions} color={COLORS.pink}/>
+          {d.indispensables.length > 0 && <React.Fragment>
+            <Section label="O que tornaria indispensável"/>
+            <div style={{background:"#FDF2F8",borderRadius:6,padding:10,maxHeight:80,overflowY:"auto"}}>
+              {d.indispensables.slice(0,4).map((w,i) => <div key={i} style={{fontSize:11,color:"#831843",marginBottom:4}}>• {w}</div>)}
+            </div>
+          </React.Fragment>}
+          <Section label="Pipeline de entrevistas"/>
+          <KPI label="Contatos" value={d.contacts.length} sub={"de "+d.n+" respostas"} color={COLORS.pink}/>
+          {d.contacts.length > 0 && (
+            <div style={{marginTop:8,maxHeight:100,overflowY:"auto"}}>
+              {d.contacts.map((c,i) => (
+                <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:"1px solid #F1F5F9",fontSize:11}}>
+                  <div style={{width:24,height:24,borderRadius:"50%",background:COLORS.pink,color:"#FFF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:600,flexShrink:0}}>{(c.contact||"?")[0].toUpperCase()}</div>
+                  <div style={{flex:1,color:"#0F172A"}}>{c.contact}</div>
+                  <div style={{color:"#94A3B8",fontSize:9}}>{(c.profile||"").substring(0,15)}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      <div style={{padding:"8px 24px",display:"flex",justifyContent:"space-between",borderTop:"1px solid #E2E8F0",fontSize:10,color:"#94A3B8"}}>
+        <span>Segunda Opinião Radiológica · Natal/RN</span>
+        <span>Dados: Google Forms · Atualização automática</span>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Dashboard/>);
+</script>
+</body>
+</html>
