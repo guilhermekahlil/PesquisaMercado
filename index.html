@@ -18,44 +18,79 @@
 }
 body{font-family:'DM Sans',sans-serif;background:var(--page);color:var(--tx2);min-height:100vh;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 #app{display:flex;flex-direction:column;min-height:100vh}
-.hdr{background:rgba(15,17,23,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 36px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+
+/* ─── HEADER ─── */
+.hdr{background:rgba(15,17,23,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 36px;display:flex;flex-direction:column;position:sticky;top:0;z-index:100}
+.hdr-top{height:52px;display:flex;align-items:center;justify-content:space-between}
 .hdr-logo{display:flex;align-items:center;gap:12px}
 .hdr-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:glow 2.5s ease-in-out infinite}
 @keyframes glow{0%,100%{opacity:1}50%{opacity:.5}}
 .hdr-title{font-family:'Instrument Serif',serif;font-size:16px;color:var(--tx1)}
-.hdr-sub{font-size:11px;color:var(--tx4);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
-.hdr-right{display:flex;align-items:center;gap:16px}
-.hdr-badge{display:flex;align-items:center;gap:10px;background:var(--inset);border:1px solid var(--border2);border-radius:8px;padding:7px 16px}
-.hdr-n{font-family:'Instrument Serif',serif;font-size:22px;color:var(--tx1);line-height:1}
-.hdr-nlabel{font-size:11px;color:var(--tx3);margin-top:1px}
-.hdr-sep{width:1px;height:22px;background:var(--border2)}
-.hdr-live{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx3)}
+.hdr-sub{font-size:10px;color:var(--tx4);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:14px}
+.hdr-badge{display:flex;align-items:center;gap:10px;background:var(--inset);border:1px solid var(--border2);border-radius:8px;padding:6px 14px}
+.hdr-n{font-family:'Instrument Serif',serif;font-size:20px;color:var(--tx1);line-height:1}
+.hdr-nlabel{font-size:10px;color:var(--tx3);margin-top:1px}
+.hdr-sep{width:1px;height:20px;background:var(--border2)}
+.hdr-live{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--tx3)}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:glow 2s infinite}
-.btn{background:transparent;color:var(--tx3);border:1px solid var(--border2);border-radius:7px;padding:7px 16px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
-.btn:hover{background:var(--inset);color:var(--tx1)}
+/* Refresh button with loading state */
+.btn-refresh{display:flex;align-items:center;gap:6px;background:transparent;color:var(--tx3);border:1px solid var(--border2);border-radius:7px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-refresh:hover:not(:disabled){background:var(--inset);color:var(--tx1)}
+.btn-refresh:disabled{opacity:.5;cursor:not-allowed}
+.btn-refresh .spin{display:none;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--border2);border-top-color:var(--blue);animation:spin .6s linear infinite}
+.btn-refresh.loading .spin{display:block}
+.btn-refresh.loading .icon{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* FILTER BAR */
-.filterbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 36px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:56px;z-index:90}
-.filter-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx4);font-weight:500}
-.filter-group{display:flex;align-items:center;gap:8px}
-.fg-name{font-size:11px;color:var(--tx3)}
-.chip{background:var(--inset);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:11px;color:var(--tx3);cursor:pointer;transition:all .15s;white-space:nowrap}
+/* ─── PROGRESS BAR IN HEADER ─── */
+.hdr-progress{padding:6px 0 10px;display:flex;align-items:center;gap:12px}
+.progress-track{flex:1;height:4px;background:var(--inset);border-radius:2px;overflow:hidden;position:relative}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--teal));transition:width .8s cubic-bezier(.4,0,.2,1)}
+.progress-label{font-size:11px;color:var(--tx4);white-space:nowrap;flex-shrink:0}
+.progress-label strong{color:var(--tx2)}
+.progress-label .remaining{color:var(--amber);font-weight:600}
+
+/* ─── FILTER BAR ─── */
+.filterbar{background:var(--card);border-bottom:1px solid var(--border);padding:10px 36px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:88px;z-index:90}
+.filter-intro{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.filter-label{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--tx4);font-weight:500}
+.filter-logic{font-size:10px;color:var(--tx4);background:var(--inset);border:1px solid var(--border);border-radius:4px;padding:2px 6px;letter-spacing:.5px}
+.filter-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.filter-group{display:flex;align-items:center;gap:6px}
+.fg-name{font-size:10px;color:var(--tx4);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.chip{background:var(--inset);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--tx3);cursor:pointer;transition:all .15s;white-space:nowrap;user-select:none}
 .chip:hover{border-color:var(--border2);color:var(--tx2)}
-.chip.active{background:rgba(107,159,255,.15);border-color:var(--blue);color:var(--blue)}
-.filter-clear{font-size:11px;color:var(--tx4);cursor:pointer;text-decoration:underline;margin-left:auto}
+.chip.active{background:rgba(107,159,255,.15);border-color:var(--blue);color:var(--blue);font-weight:600}
+.filter-result{font-size:11px;color:var(--tx4);margin-left:4px}
+.filter-result strong{color:var(--tx2)}
+.filter-clear{font-size:11px;color:var(--tx4);cursor:pointer;text-decoration:underline;margin-left:auto;flex-shrink:0}
 .filter-clear:hover{color:var(--tx2)}
 
-/* PROGRESS TO GOAL */
-.goalbar{background:var(--inset);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:16px;margin-bottom:0}
-.goal-track{flex:1;height:8px;background:var(--page);border-radius:4px;overflow:hidden}
-.goal-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--teal));transition:width .6s}
-.goal-text{font-size:12px;color:var(--tx2);white-space:nowrap}
-.goal-text strong{color:var(--tx1)}
+/* ─── EXECUTIVE SUMMARY ─── */
+.exec-summary{grid-column:1/3;background:linear-gradient(135deg,rgba(27,44,74,.6),rgba(24,28,38,.8));border:1px solid var(--border2);border-radius:16px;padding:20px 24px;position:relative;overflow:hidden}
+.exec-summary::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--teal))}
+.exec-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.exec-icon{font-size:18px;line-height:1}
+.exec-title{font-family:'Instrument Serif',serif;font-size:16px;color:var(--tx1)}
+.exec-meta{margin-left:auto;font-size:10px;color:var(--tx4);letter-spacing:.8px;text-transform:uppercase}
+.exec-text{font-size:13px;color:var(--tx2);line-height:1.8;font-weight:400}
+.exec-text strong{color:var(--tx1);font-weight:600}
+.exec-text .tag{display:inline-block;border-radius:4px;padding:0px 6px;font-size:11px;font-weight:600;margin:0 2px;vertical-align:middle}
+.exec-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.exec-action{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:5px 12px;border-radius:6px;border:1px solid}
 
-/* SCORE STRIP */
+/* ─── PROFILE CARD — full width + proeminente ─── */
+.card-profile{grid-column:1/3;background:var(--card);border-radius:16px;border:1px solid var(--border2);padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px;transition:border-color .2s}
+.card-profile:hover{border-color:rgba(107,159,255,.3)}
+.card-profile-left{display:flex;flex-direction:column}
+.card-profile-right{display:flex;flex-direction:column;border-left:1px solid var(--border);padding-left:24px}
+.profile-validity{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 14px;border-radius:10px;border:1px solid;font-size:12px}
+
+/* ─── SCORE STRIP ─── */
 .score-strip{grid-column:1/3;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px}
 .score-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.score-title{font-family:'Instrument Serif',serif;font-size:18px;color:var(--tx1)}
+.score-title{font-family:'Instrument Serif',serif;font-size:17px;color:var(--tx1)}
 .score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .score-card{background:var(--inset);border-radius:10px;padding:14px 16px;border-top:2px solid}
 .score-label{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--tx4);margin-bottom:6px}
@@ -63,6 +98,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--page);color:var(--tx2);mi
 .score-bench{font-size:10px;color:var(--tx3);margin-top:4px}
 .score-status{display:inline-block;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;margin-top:6px}
 
+/* ─── GRID ─── */
 .grid{padding:24px 36px;display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;align-items:start}
 .divider{grid-column:1/3;display:flex;align-items:center;gap:16px;padding:8px 0 4px}
 .div-line{flex:1;height:1px;background:var(--border)}
@@ -102,22 +138,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--page);color:var(--tx2);mi
 .quotes{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .quote{background:var(--inset);border-radius:8px;padding:12px 14px;font-size:12px;font-style:italic;color:var(--tx2);line-height:1.7;border-left:3px solid var(--border2)}
 .quote strong{font-style:normal;color:var(--tx1);font-weight:500}
-.ipill{display:inline-flex;align-items:center;gap:8px;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:500;margin-bottom:16px;border:1px solid;max-width:100%}
 .contact-list{display:flex;flex-direction:column;gap:4px;margin-top:4px}
 .contact-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--inset);border:1px solid var(--border)}
 .c-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
 .c-info{flex:1;min-width:0}
 .c-name{font-size:13px;font-weight:500;color:var(--tx1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .c-role{font-size:11px;color:var(--tx3);margin-top:1px}
-.c-status{font-size:10px;border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--tx3);background:var(--page);cursor:pointer;font-family:'DM Sans',sans-serif}
+.c-status{font-size:10px;border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--tx3);background:var(--page);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .15s}
 .c-btn{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+/* Heatmap — nomes completos, sem truncar */
 .heat-wrap{overflow-x:auto;margin-top:4px}
-.heat-table{border-collapse:separate;border-spacing:4px;width:100%}
-.heat-th{font-size:9px;letter-spacing:.5px;color:var(--tx3);text-transform:uppercase;text-align:center;padding:4px 6px;line-height:1.35;vertical-align:bottom}
-.heat-td-label{font-size:11px;font-weight:500;color:var(--tx2);padding:4px 10px 4px 0;line-height:1.35;min-width:120px;vertical-align:middle}
-.heat-cell{border-radius:6px;padding:5px 8px;font-size:11px;font-weight:600;text-align:center;min-width:34px;display:inline-block}
+.heat-table{border-collapse:separate;border-spacing:4px;min-width:100%}
+.heat-th{font-size:9px;letter-spacing:.5px;color:var(--tx3);text-transform:uppercase;text-align:center;padding:4px 6px;line-height:1.35;vertical-align:bottom;white-space:normal;max-width:100px}
+.heat-td-label{font-size:11px;font-weight:500;color:var(--tx2);padding:4px 12px 4px 0;line-height:1.4;white-space:normal;vertical-align:middle;min-width:0;max-width:200px}
+.heat-cell{border-radius:6px;padding:5px 8px;font-size:11px;font-weight:600;text-align:center;min-width:36px;display:inline-block}
 .heat-legend{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:10px;color:var(--tx4)}
 .heat-grad{width:80px;height:6px;border-radius:3px;background:linear-gradient(to right,var(--inset),rgba(251,191,36,.8));border:1px solid var(--border)}
+.heat-minsample{font-size:11px;font-style:italic;color:var(--tx4);padding:10px 0}
+/* VW */
 .vw-cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
 .vw-mini-card{background:var(--inset);border-radius:8px;padding:10px 12px;border-left:3px solid}
 .vw-mini-label{font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--tx4);margin-bottom:3px}
@@ -130,27 +168,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--page);color:var(--tx2);mi
 .state-title{font-family:'Instrument Serif',serif;font-size:18px;color:var(--tx2)}
 .state-sub{font-size:12px;color:var(--tx4)}
 .state-spinner{width:32px;height:32px;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--blue);animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 .footer{padding:14px 36px;display:flex;justify-content:space-between;font-size:10px;color:var(--tx4);letter-spacing:1px;text-transform:uppercase;border-top:1px solid var(--border);background:var(--page)}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--page)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 </style>
-
 </head>
 <body>
 <div id="app"><div class="state-center"><div class="state-spinner"></div><div class="state-title">Carregando dados</div><div class="state-sub">Conectando ao Google Sheets…</div></div></div>
 <script>
 const SHEET="https://docs.google.com/spreadsheets/d/e/2PACX-1vRIqIG3zTLcnsJsXQ3BLpAEdOyE4qbwdPptdX5K2oK2iko11XhNDQnK4Ea3kU0j1IUJG5I7WaMD5F4y/pub?output=csv";
-const REFRESH=60000, GOAL=20;
-let lastUpdate=null, rawRecords=null, colIdx=null;
-let filters={profile:null,env:null,freq:null,intent:null};
-let contactStatus={}; // contato -> status
+const REFRESH=60000,GOAL=20,CROSS_MIN=5;
+let lastUpdate=null,rawRecords=null,colIdx=null;
+let filters={profile:null,freq:null,intent:null};
+let contactStatus={};
+let isLoading=false;
 
 const B={1:{a:'#6B9FFF',b:'rgba(107,159,255,.15)'},2:{a:'#FF6B6B',b:'rgba(255,107,107,.15)'},3:{a:'#A78BFA',b:'rgba(167,139,250,.15)'},4:{a:'#4ECDC4',b:'rgba(78,205,196,.15)'},5:{a:'#FBBF24',b:'rgba(251,191,36,.15)'},6:{a:'#F472B6',b:'rgba(244,114,182,.15)'}};
 const TESTE=[/^teste$/i,/^x+$/i,/^\s*$/,/^(test|aaa|bbb|zzz|abc|qwe|asd)$/i,/^.$/];
 const isTeste=s=>TESTE.some(p=>p.test((s||'').trim()));
 const LIXO=/^(etc\.?|outros?|other|[-–])$/i;
+const STATUS=['Não contactado','Agendado','Realizado'];
 
 function col(H,kw){const i=H.findIndex(h=>h&&h.toLowerCase().includes(kw.toLowerCase()));return i>=0?i:-1}
 function colOr(H,...k){for(const kw of k){const i=col(H,kw);if(i>=0)return i}return -1}
@@ -173,7 +211,6 @@ function countBase(recs,idx,multi){
 const cv=(R,i)=>countBase(R,i,false);
 const cvm=(R,i)=>countBase(R,i,true);
 
-// Detecta colunas uma vez
 function detectCols(H){
   return{
     profile:colOr(H,'perfil médico','perfil'),env:colOr(H,'ambiente'),
@@ -181,22 +218,22 @@ function detectCols(H){
     exams:colOr(H,'tipos de exame'),behav:colOr(H,'costuma fazer','dúvida sobre um exame'),
     worry:colOr(H,'preocupação'),caseImp:colOr(H,'opinião adicional','conduta'),
     action:colOr(H,'diante da dúvida'),desc:colOr(H,'brevemente','descreva'),
-    vw1:colOr(H,'tão barato'),vw2:colOr(H,'barato, mas','barato'),vw3:colOr(H,'caro, mas'),vw4:colOr(H,'tão caro'),
+    vw1:colOr(H,'tão barato'),vw2:colOr(H,'barato, mas','barato'),
+    vw3:colOr(H,'caro, mas'),vw4:colOr(H,'tão caro'),
     band:colOr(H,'faixa melhor','faixa'),deadline:colOr(H,'prazo'),
     urgency:colOr(H,'pagar a mais','urgente'),model:colOr(H,'cobrança'),
-    intent:colOr(H,'disponível hoje','plataforma estivesse'),indisp:colOr(H,'indispensável'),
-    interv:colOr(H,'entrevista'),contact:colOr(H,'contato'),ts:0
+    intent:colOr(H,'disponível hoje','plataforma estivesse'),
+    indisp:colOr(H,'indispensável'),interv:colOr(H,'entrevista'),contact:colOr(H,'contato')
   };
 }
 
-// Buckets para filtros (normaliza valores longos em categorias)
 function freqBucket(v){v=(v||'').toLowerCase();if(v.includes('diari')||v.includes('diár'))return'Diária';if(v.includes('semana'))return'Semanal';if(v.includes('mês')||v.includes('mes'))return'Mensal';if(v.includes('nunca')||v.includes('rara'))return'Rara';return v?'Outra':''}
 function intentBucket(v){v=(v||'').toLowerCase();if(v.includes('imediat'))return'Usaria já';if(v.includes('depend')||v.includes('preço'))return'Depende do preço';if(v.includes('específic')||v.includes('talvez'))return'Talvez';if(v.includes('não')||v.includes('nao'))return'Não usaria';return v?'Outra':''}
 
 function applyFilters(recs){
+  // Todos os filtros ativos são AND
   return recs.filter(r=>{
     if(filters.profile&&(r[colIdx.profile]||'').trim()!==filters.profile)return false;
-    if(filters.env&&!(r[colIdx.env]||'').includes(filters.env))return false;
     if(filters.freq&&freqBucket(r[colIdx.freq])!==filters.freq)return false;
     if(filters.intent&&intentBucket(r[colIdx.intent])!==filters.intent)return false;
     return true;
@@ -224,15 +261,9 @@ function compute(recs){
   const bands=cv(recs,I.band),deadlines=cv(recs,I.deadline),urgencies=cv(recs,I.urgency),models=cv(recs,I.model),intentions=cv(recs,I.intent);
   const indisp=recs.map(r=>(r[I.indisp]||'').trim()).filter(s=>s&&!isTeste(s));
 
-  // VW curve — metodologia clássica Van Westendorp.
-  // 4 curvas cumulativas com direção correta:
-  //  d1 "barato demais": % cujo valor-barato-demais >= p  (DECRESCE)
-  //  d2 "não-caro/aceitável": % cujo valor-aceitável >= p  (DECRESCE)
-  //  d3 "caro mas paga": % cujo valor <= p                 (CRESCE)
-  //  d4 "caro demais": % cujo valor <= p                   (CRESCE)
-  // OPP ponto ótimo = interseção d1×d4 ; PMC = d1×d3 ; PME = d2×d4
+  // VW — metodologia clássica: d1 decrescente, d2 decrescente, d3 crescente, d4 crescente
   const vwCurve=[];let optP=null,minOk=null,maxOk=null;
-  if(vw1.length&&vw4.length){
+  if(vw1.length>=3&&vw4.length>=3){
     const all=[...vw1,...vw2,...vw3,...vw4].sort((a,b)=>a-b);
     const mn=all[0],mx=all[all.length-1],step=Math.max(5,Math.round((mx-mn)/12));
     for(let p=mn;p<=mx;p+=step)vwCurve.push({p,
@@ -242,250 +273,344 @@ function compute(recs){
       d4:pct(vw4.filter(v=>v<=p).length,vw4.length)});
     const pr=vwCurve.map(c=>c.p),d1=vwCurve.map(c=>c.d1),d2=vwCurve.map(c=>c.d2),d3=vwCurve.map(c=>c.d3),d4=vwCurve.map(c=>c.d4);
     const cross=(a,b)=>{for(let i=1;i<pr.length;i++){const pv=a[i-1]-b[i-1],cu=a[i]-b[i];if(pv===0&&cu===0)continue;if(pv*cu<=0){const t=Math.abs(pv)/((Math.abs(pv)+Math.abs(cu))||1);return Math.round(pr[i-1]+t*(pr[i]-pr[i-1]))}}return null};
-    optP=cross(d1,d4);                              // OPP
-    minOk=cross(d1,d3);                             // PMC ponto de barateza marginal
-    maxOk=cross(d2,d4);                             // PME ponto de carestia marginal
+    optP=cross(d1,d4);minOk=cross(d1,d3);maxOk=cross(d2,d4);
     if(optP===null)optP=pr[Math.floor(pr.length/2)];
     if(minOk===null)minOk=pr[0];
     if(maxOk===null)maxOk=pr[pr.length-1];
-    if(minOk>maxOk){const t=minOk;minOk=maxOk;maxOk=t}   // garante ordem
+    if(minOk>maxOk){const t=minOk;minOk=maxOk;maxOk=t}
   }
   const optPrice=optP!==null?'R$'+optP:null;
 
-  // Cruzamentos
-  const crossFreq={},crossIntent={},crossModel={};
+  const crossFreq={},crossIntent={};
   recs.forEach(r=>{
     const p=(r[I.profile]||'').trim();if(!p)return;
-    const f=freqBucket(r[I.freq]);if(f){(crossFreq[p]=crossFreq[p]||{})[f]=(crossFreq[p][f]||0)+1}
-    const it=intentBucket(r[I.intent]);if(it){(crossIntent[p]=crossIntent[p]||{})[it]=(crossIntent[p][it]||0)+1}
-    const md=(r[I.model]||'').trim();if(md){const k=trunc(md,22);(crossModel[p]=crossModel[p]||{})[k]=(crossModel[p][k]||0)+1}
+    const f=freqBucket(r[I.freq]);if(f)(crossFreq[p]=crossFreq[p]||{})[f]=(crossFreq[p][f]||0)+1;
+    const it=intentBucket(r[I.intent]);if(it)(crossIntent[p]=crossIntent[p]||{})[it]=(crossIntent[p][it]||0)+1;
   });
 
   const contacts=recs.filter(r=>(r[I.interv]||'').toLowerCase().includes('sim'))
     .map(r=>({contact:(r[I.contact]||'').trim(),profile:(r[I.profile]||'').trim()})).filter(c=>c.contact);
 
-  return{n,profiles,envs,avgGrad,freqHigh,caseYes,exams,worries,behaviors,actions,stories,vwCurve,optPrice,optP,minOk,maxOk,bands,deadlines,urgencies,models,intentions,indisp,crossFreq,crossIntent,crossModel,contacts};
+  return{n,profiles,envs,avgGrad,freqHigh,caseYes,exams,worries,behaviors,actions,stories,vwCurve,optPrice,optP,minOk,maxOk,bands,deadlines,urgencies,models,intentions,indisp,crossFreq,crossIntent,contacts};
 }
 
-// ---------- RENDER HELPERS ----------
+// ────────── EXECUTIVE SUMMARY ──────────
+function execSummary(d,totalN){
+  const freqP=pct(d.freqHigh,d.n),caseP=pct(d.caseYes,d.n),contactP=pct(d.contacts.length,d.n);
+  const small=totalN<GOAL;
+  const tag=(txt,color)=>`<span class="tag" style="background:${color}22;color:${color};border:1px solid ${color}44">${txt}</span>`;
+
+  // Gera as três frases da conclusão
+  let dor,preco,acao;
+
+  if(freqP>=70) dor=`${tag('Dor forte','#FF6B6B')} ${freqP}% sentem insegurança frequente e ${caseP}% já tiveram um caso afetado — a hipótese central está <strong>confirmada</strong>.`;
+  else if(freqP>=40) dor=`${tag('Dor moderada','#F59E0B')} ${freqP}% relatam insegurança frequente. <strong>Indicativo positivo</strong>, mas ampliar a amostra aumenta a confiança.`;
+  else if(d.n<5) dor=`${tag('Amostra insuficiente','#545060')} Com apenas ${d.n} resposta${d.n===1?'':'s'}, ainda não é possível avaliar a intensidade da dor.`;
+  else dor=`${tag('Dor fraca','#F59E0B')} Só ${freqP}% com insegurança frequente — <strong>revisar o segmento</strong> antes de avançar.`;
+
+  if(d.optPrice) preco=`${tag('Preço viável','#4ECDC4')} Ponto ótimo em <strong>${d.optPrice}/caso</strong> (Van Westendorp), faixa aceitável R$${d.minOk}–R$${d.maxOk}.`;
+  else preco=`${tag('Preço indefinido','#545060')} Dados de precificação insuficientes — mais respostas nas perguntas 16–19.`;
+
+  if(small) acao=`${tag('Ampliar coleta','#F59E0B')} <strong>${totalN} de ${GOAL} respostas</strong>. Faltam ${GOAL-totalN} para conclusões confiáveis. Não tome decisões estruturais com esta amostra.`;
+  else if(d.contacts.length>0) acao=`${tag('Agir agora','#4ADE80')} <strong>${d.contacts.length} médico${d.contacts.length>1?'s':''} (${contactP}%) toparam conversar</strong>. Agende as entrevistas esta semana — o momentum está ativo.`;
+  else acao=`${tag('Próximo passo','#6B9FFF')} Dados suficientes para análise. Focar em converter respondentes em entrevistas qualitativas.`;
+
+  // Perfil dominante
+  const perfil=d.profiles[0]?.name||null;
+  const ambiente=d.envs[0]?.name||null;
+  const perfilNote=perfil?`Perfil dominante: <strong>${esc(perfil)}</strong>${ambiente?` em <strong>${esc(ambiente)}</strong>`:''}.`:'';
+
+  return`<div class="exec-summary">
+    <div class="exec-head">
+      <span class="exec-icon">📋</span>
+      <span class="exec-title">Conclusão executiva</span>
+      <span class="exec-meta">${lastUpdate?lastUpdate.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}</span>
+    </div>
+    <div class="exec-text">
+      ${dor} ${preco} ${acao}
+      ${perfilNote?'<br/><span style="color:var(--tx3);font-size:12px">'+perfilNote+'</span>':''}
+    </div>
+  </div>`;
+}
+
+// ────────── RENDER HELPERS ──────────
 const empty=()=>`<div style="padding:10px 0;font-size:12px;font-style:italic;color:var(--tx4)">Sem dados ainda</div>`;
-function sampleWarn(n){if(n>=GOAL)return'';return`<div class="sample-warn"><span>⚠</span><span>Amostra pequena (n=${n}). Percentuais são indicativos — continue coletando até ~${GOAL} para confiança.</span></div>`}
+function sampleWarn(n){if(n>=GOAL)return'';return`<div class="sample-warn"><span>⚠</span><span>Amostra pequena (n=${n}) — percentuais são indicativos. Continue coletando.</span></div>`}
 function verdict(t,ic,html){const c={ok:'v-ok',warn:'v-warn',info:'v-info',hot:'v-hot'}[t]||'v-info';return`<div class="verdict ${c}"><div class="verdict-icon">${ic}</div><div class="verdict-text">${html}</div></div>`}
 
 function barList(items,hex,total){
   if(!items||!items.length)return empty();
   const top=items.slice(0,7),maxV=Math.max(...top.map(i=>i.val),1);
-  const tied=top.length>1&&top.every(i=>i.val===top[0].val);
-  const base=total||maxV;
+  const tied=top.length>1&&top.every(i=>i.val===top[0].val),base=total||maxV;
   return`<div class="bar-list">${top.map((it,idx)=>{
-    const op=idx===0?1:idx===1?.6:.35,fill=hexA(hex,op);
+    const fill=hexA(hex,idx===0?1:idx===1?.6:.35);
     const bw=tied?62:Math.max(Math.round(it.val/maxV*100),4);
     return`<div class="bar-row"><div class="bar-rank">${String(idx+1).padStart(2,'0')}</div>
       <div class="bar-label" title="${esc(it.name)}">${esc(it.name)}</div>
       <div class="bar-right"><div class="bar-track"><div class="bar-fill" style="width:${bw}%;background:${fill}"></div></div>
-      <div class="bar-meta"><div class="bar-pct">${pct(it.val,base)}<span style="font-size:10px;font-weight:400;color:var(--tx3)">%</span></div><div class="bar-n">${it.val}${tied&&idx===0?' · empate':''}</div></div></div></div>`}).join('')}</div>`;
-}
+      <div class="bar-meta"><div class="bar-pct">${pct(it.val,base)}<span style="font-size:10px;font-weight:400;color:var(--tx3)">%</span></div><div class="bar-n">${it.val}${tied&&idx===0?' · empate':''}</div></div></div></div>`;
+  }).join('')}</div>`;}
 
-function heatMap(cross,hdrLabel){
+// Heatmap — nomes completos, oculta se n < CROSS_MIN
+function heatMap(cross,label,n){
+  if(n<CROSS_MIN)return`<div class="heat-minsample">Aguardando ${CROSS_MIN} respostas para exibir este cruzamento. (n atual = ${n})</div>`;
   const rows=Object.keys(cross),cols=[...new Set(Object.values(cross).flatMap(v=>Object.keys(v)))];
   if(!rows.length)return empty();
   const gmax=Math.max(...rows.flatMap(p=>cols.map(c=>cross[p][c]||0)),1);
-  return`<div class="heat-wrap"><table class="heat-table"><thead><tr><th style="text-align:left;min-width:120px"></th>${cols.map(c=>`<th class="heat-th" title="${esc(c)}">${esc(c)}</th>`).join('')}</tr></thead>
-    <tbody>${rows.map(p=>`<tr><td class="heat-td-label" title="${esc(p)}">${esc(trunc(p,26))}</td>${cols.map(c=>{const v=cross[p][c]||0;if(!v)return`<td style="text-align:center"><div class="heat-cell" style="background:var(--inset);color:var(--tx4)">—</div></td>`;const o=v/gmax,bg=`rgba(251,191,36,${(o*.7+.15).toFixed(2)})`,tc=o>.45?'#0F1117':'var(--tx2)';return`<td style="text-align:center"><div class="heat-cell" style="background:${bg};color:${tc}">${v}</div></td>`}).join('')}</tr>`).join('')}</tbody></table>
-    <div class="heat-legend"><span>${hdrLabel||'Frequência'}:</span><div class="heat-grad"></div><span>Baixa → Alta</span></div></div>`;
-}
+  return`<div class="heat-wrap"><table class="heat-table">
+    <thead><tr><th style="text-align:left;padding-bottom:6px;min-width:0"></th>${cols.map(c=>`<th class="heat-th">${esc(c)}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(p=>`<tr><td class="heat-td-label">${esc(p)}</td>${cols.map(c=>{
+      const v=cross[p][c]||0;
+      if(!v)return`<td style="text-align:center"><div class="heat-cell" style="background:var(--inset);color:var(--tx4)">—</div></td>`;
+      const o=v/gmax,bg=`rgba(251,191,36,${(o*.7+.15).toFixed(2)})`,tc=o>.45?'#0F1117':'var(--tx2)';
+      return`<td style="text-align:center"><div class="heat-cell" style="background:${bg};color:${tc}">${v}</div></td>`;
+    }).join('')}</tr>`).join('')}</tbody></table>
+    <div class="heat-legend"><span>${label}:</span><div class="heat-grad"></div><span>Baixa → Alta</span></div></div>`;}
 
 let _vwid=0;
 function vwChart(d){
-  if(!d.vwCurve.length)return empty();
+  if(!d.vwCurve.length)return`<div class="sample-warn"><span>⚠</span><span>Mínimo 3 respostas numéricas de preço para gerar a curva.</span></div>`;
   const pr=d.vwCurve.map(c=>c.p),d1=d.vwCurve.map(c=>c.d1),d2=d.vwCurve.map(c=>c.d2),d3=d.vwCurve.map(c=>c.d3),d4=d.vwCurve.map(c=>c.d4);
   const cid='vw'+(++_vwid);
-  setTimeout(()=>buildVW(cid,pr,d1,d2,d3,d4,d.minOk,d.maxOk,d.optP),60);
-  return `<div class="vw-cards-row">
+  setTimeout(()=>{
+    const el=document.getElementById(cid);if(!el)return;
+    const gc='rgba(255,255,255,0.07)',tc='#545060';
+    const mi=pr.indexOf(d.minOk),ma=pr.indexOf(d.maxOk),oi=pr.indexOf(d.optP);
+    const zone={id:'z'+cid,
+      beforeDraw(c){const{ctx,chartArea:a,scales:{x}}=c;if(!a)return;const x1=x.getPixelForValue(mi<0?0:mi),x2=x.getPixelForValue(ma<0?pr.length-1:ma);ctx.save();ctx.fillStyle='rgba(74,222,128,0.06)';ctx.fillRect(x1,a.top,x2-x1,a.bottom-a.top);ctx.restore()},
+      afterDraw(c){const{ctx,chartArea:a,scales:{x}}=c;if(!a||oi<0)return;const xo=x.getPixelForValue(oi);ctx.save();ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(xo,a.top);ctx.lineTo(xo,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(255,255,255,0.6)';ctx.font='10px DM Sans';ctx.textAlign='center';ctx.fillText('R$'+d.optP,xo,a.top-3);ctx.restore()}};
+    new Chart(el,{type:'line',plugins:[zone],data:{labels:pr,datasets:[
+      {label:'Barato demais',data:d1,borderColor:'#FF6B6B',borderWidth:2,borderDash:[5,3],pointRadius:2,tension:.4},
+      {label:'Aceitável',data:d2,borderColor:'#4ADE80',borderWidth:2.5,pointRadius:2,tension:.4},
+      {label:'Caro mas paga',data:d3,borderColor:'#FBBF24',borderWidth:2.5,pointRadius:2,tension:.4},
+      {label:'Caro demais',data:d4,borderColor:'#F87171',borderWidth:2,borderDash:[5,3],pointRadius:2,tension:.4}]},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:12,padding:10}},tooltip:{callbacks:{title:i=>'R$'+pr[i[0].dataIndex],label:c=>c.dataset.label+': '+c.raw+'%'}}},
+        scales:{x:{ticks:{color:tc,font:{size:10},callback:(_,i)=>'R$'+pr[i]},grid:{color:gc}},y:{min:0,max:100,ticks:{color:tc,font:{size:10},callback:v=>v+'%'},grid:{color:gc}}}}});
+  },60);
+  return`<div class="vw-cards-row">
     <div class="vw-mini-card" style="border-color:#FF6B6B"><div class="vw-mini-label">Barato demais</div><div class="vw-mini-val" style="color:#FF6B6B">R$${pr[0]}</div><div class="vw-mini-desc">Gera desconfiança</div></div>
     <div class="vw-mini-card" style="border-color:#4ADE80"><div class="vw-mini-label">Mín. aceitável</div><div class="vw-mini-val" style="color:#4ADE80">R$${d.minOk}</div><div class="vw-mini-desc">Parece justo</div></div>
     <div class="vw-mini-card" style="border-color:#FBBF24"><div class="vw-mini-label">Caro mas paga</div><div class="vw-mini-val" style="color:#FBBF24">R$${d.maxOk}</div><div class="vw-mini-desc">Limite tolerado</div></div>
     <div class="vw-mini-card" style="border-color:#F87171"><div class="vw-mini-label">Caro demais</div><div class="vw-mini-val" style="color:#F87171">R$${pr[pr.length-1]}</div><div class="vw-mini-desc">Perde conversão</div></div></div>
     <div class="vw-zone-bar">◷ <span>Zona ideal: <strong>R$${d.minOk}–R$${d.maxOk}</strong> · Ponto ótimo: <strong>R$${d.optP}</strong></span></div>
-    <div class="vw-chart-wrap"><canvas id="${cid}"></canvas></div>`;
-}
-function buildVW(cid,pr,d1,d2,d3,d4,minOk,maxOk,optP){
-  const el=document.getElementById(cid);if(!el||typeof Chart==='undefined')return;
-  const gc='rgba(255,255,255,0.07)',tc='#545060';
-  const oi=pr.indexOf(optP),mi=pr.indexOf(minOk),ma=pr.indexOf(maxOk);
-  const zone={id:'z'+cid,beforeDraw(c){const{ctx,chartArea:a,scales:{x}}=c;if(!a)return;const x1=x.getPixelForValue(mi<0?0:mi),x2=x.getPixelForValue(ma<0?pr.length-1:ma);ctx.save();ctx.fillStyle='rgba(74,222,128,0.06)';ctx.fillRect(x1,a.top,x2-x1,a.bottom-a.top);ctx.restore()},
-    afterDraw(c){const{ctx,chartArea:a,scales:{x}}=c;if(!a||oi<0)return;const xo=x.getPixelForValue(oi);ctx.save();ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(xo,a.top);ctx.lineTo(xo,a.bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(255,255,255,0.6)';ctx.font='500 10px DM Sans';ctx.textAlign='center';ctx.fillText('R$'+optP,xo,a.top-3);ctx.restore()}};
-  new Chart(el,{type:'line',plugins:[zone],data:{labels:pr,datasets:[
-    {label:'Barato demais',data:d1,borderColor:'#FF6B6B',borderWidth:2,borderDash:[6,3],pointRadius:2,tension:.4},
-    {label:'Aceitável',data:d2,borderColor:'#4ADE80',borderWidth:2.5,pointRadius:2,tension:.4},
-    {label:'Caro mas paga',data:d3,borderColor:'#FBBF24',borderWidth:2.5,pointRadius:2,tension:.4},
-    {label:'Caro demais',data:d4,borderColor:'#F87171',borderWidth:2,borderDash:[6,3],pointRadius:2,tension:.4}]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:true,labels:{color:tc,font:{size:10},boxWidth:14,padding:10}},tooltip:{callbacks:{title:i=>'R$'+pr[i[0].dataIndex],label:c=>c.dataset.label+': '+c.raw+'%'}}},
-      scales:{x:{ticks:{color:tc,font:{size:10},callback:(_,i)=>'R$'+pr[i]},grid:{color:gc}},y:{min:0,max:100,ticks:{color:tc,font:{size:10},callback:v=>v+'%'},grid:{color:gc}}}}});
-}
+    <div class="vw-chart-wrap"><canvas id="${cid}"></canvas></div>`;}
 
-// ---------- FILTER BAR ----------
-function chips(name,key,opts){
-  return`<div class="filter-group"><span class="fg-name">${name}</span>${opts.map(o=>`<span class="chip${filters[key]===o?' active':''}" onclick="toggleFilter('${key}','${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</span>`).join('')}</div>`;
-}
-function toggleFilter(key,val){filters[key]=filters[key]===val?null:val;rerender()}
-function clearFilters(){filters={profile:null,env:null,freq:null,intent:null};rerender()}
+// ────────── FILTER BAR ──────────
+function chips(key,opts){
+  return opts.map(o=>`<span class="chip${filters[key]===o?' active':''}" onclick="toggleFilter('${key}','${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</span>`).join('');}
 
-function buildFilterBar(){
+function buildFilterBar(totalN){
   const I=colIdx;
   const profs=[...new Set(rawRecords.map(r=>(r[I.profile]||'').trim()).filter(Boolean))].slice(0,5);
-  const envs=[...new Set(rawRecords.flatMap(r=>splitParens(r[I.env]||'').map(limpar)).filter(s=>s.length>1))].slice(0,5);
   const freqs=[...new Set(rawRecords.map(r=>freqBucket(r[I.freq])).filter(Boolean))];
   const intents=[...new Set(rawRecords.map(r=>intentBucket(r[I.intent])).filter(Boolean))];
   const active=Object.values(filters).some(v=>v);
-  return`<div class="filterbar"><span class="filter-label">Filtros</span>
-    ${profs.length?chips('Perfil','profile',profs):''}
-    ${freqs.length?chips('Frequência','freq',freqs):''}
-    ${intents.length?chips('Intenção','intent',intents):''}
-    ${active?`<span class="filter-clear" onclick="clearFilters()">limpar filtros ✕</span>`:''}
-  </div>`;
-}
+  const filtered=applyFilters(rawRecords);
+  return`<div class="filterbar">
+    <div class="filter-intro">
+      <span class="filter-label">Filtrar</span>
+      <span class="filter-logic" title="Todos os filtros ativos são combinados com AND (interseção)">AND</span>
+    </div>
+    ${profs.length?`<div class="filter-sep"></div><div class="filter-group"><span class="fg-name">Perfil</span>${chips('profile',profs)}</div>`:''}
+    ${freqs.length?`<div class="filter-sep"></div><div class="filter-group"><span class="fg-name">Frequência</span>${chips('freq',freqs)}</div>`:''}
+    ${intents.length?`<div class="filter-sep"></div><div class="filter-group"><span class="fg-name">Intenção</span>${chips('intent',intents)}</div>`:''}
+    ${active?`<span class="filter-result">→ <strong>${filtered.length}</strong> de ${totalN}</span><span class="filter-clear" onclick="clearFilters()">limpar ✕</span>`:''}
+  </div>`;}
 
-// ---------- SCORE STRIP ----------
-function scoreStrip(d){
-  const freqP=pct(d.freqHigh,d.n),caseP=pct(d.caseYes,d.n),intentNow=d.intentions.find(i=>/imediat/i.test(i.name));
+// ────────── SCORE STRIP ──────────
+function scoreStrip(d,totalN){
+  const freqP=pct(d.freqHigh,d.n),caseP=pct(d.caseYes,d.n);
+  const intentNow=d.intentions.find(i=>/imediat/i.test(i.name));
   const intentP=intentNow?pct(intentNow.val,d.n):0;
-  const small=d.n<GOAL;
+  const small=totalN<GOAL;
   const sc=(label,val,bench,ok,color)=>`<div class="score-card" style="border-color:${color}">
     <div class="score-label">${label}</div><div class="score-val">${val}</div>
     <div class="score-bench">${bench}</div>
     <div class="score-status" style="background:${ok?'rgba(74,222,128,.15)':'rgba(245,158,11,.15)'};color:${ok?'#4ADE80':'#F59E0B'}">${ok?'✓ atinge':'○ abaixo'}</div></div>`;
   return`<div class="score-strip">
-    <div class="score-head"><span style="font-size:18px">🎯</span><span class="score-title">Score de validação</span>
-    ${small?`<span style="margin-left:auto;font-size:11px;color:#F59E0B">⚠ amostra n=${d.n} — indicativo, não conclusivo</span>`:''}</div>
+    <div class="score-head"><span style="font-size:16px">📊</span><span class="score-title">Score de validação</span>
+    ${small?`<span style="margin-left:auto;font-size:11px;color:#F59E0B">⚠ n=${totalN} — indicativo</span>`:''}</div>
     <div class="score-grid">
-      ${sc('Problem-Solution Fit',freqP+'%',"meta: >40% c/ dor frequente",freqP>40,'#FF6B6B')}
-      ${sc('Disposição a pagar',d.optPrice||'—',"ponto ótimo Van Westendorp",!!d.optPrice,'#4ECDC4')}
-      ${sc('Intenção imediata',intentP+'%',"meta: >50% usaria já",intentP>50,'#F472B6')}
-      ${sc('Pipeline de entrevistas',d.contacts.length,"contatos para validação qualitativa",d.contacts.length>0,'#6B9FFF')}
-    </div></div>`;
-}
+      ${sc('Problem fit',freqP+'%','meta >40% c/ dor frequente',freqP>40,'#FF6B6B')}
+      ${sc('Preço ótimo',d.optPrice||'—','Van Westendorp',!!d.optPrice,'#4ECDC4')}
+      ${sc('Intenção imediata',intentP+'%','meta >50%',intentP>50,'#F472B6')}
+      ${sc('Pipeline entrevistas',d.contacts.length,'contatos disponíveis',d.contacts.length>0,'#6B9FFF')}
+    </div></div>`;}
 
-// ---------- CONTACT STATUS ----------
-const STATUS=['Não contactado','Agendado','Realizado'];
-function cycleStatus(key){const cur=contactStatus[key]||STATUS[0];const i=(STATUS.indexOf(cur)+1)%STATUS.length;contactStatus[key]=STATUS[i];rerender()}
+// ────────── MAIN RENDER ──────────
+function toggleFilter(key,val){filters[key]=filters[key]===val?null:val;rerender()}
+function clearFilters(){filters={profile:null,freq:null,intent:null};rerender()}
+function cycleStatus(key){const cur=contactStatus[key]||STATUS[0];contactStatus[key]=STATUS[(STATUS.indexOf(cur)+1)%STATUS.length];rerender()}
 
-// ---------- MAIN RENDER ----------
-function rerender(){
-  const recs=applyFilters(rawRecords);
-  const d=compute(recs);
-  render(d);
-}
+function rerender(){const recs=applyFilters(rawRecords);render(recs,compute(recs));}
 
-function render(d){
+function render(recs,d){
+  const totalN=rawRecords.length;
   const now=lastUpdate?lastUpdate.toLocaleTimeString('pt-BR'):'';
   const freqP=pct(d.freqHigh,d.n),caseP=pct(d.caseYes,d.n),contactP=pct(d.contacts.length,d.n);
-  const goalP=Math.min(Math.round(rawRecords.length/GOAL*100),100);
+  const goalP=Math.min(Math.round(totalN/GOAL*100),100);
+  const remaining=Math.max(GOAL-totalN,0);
 
-  const v1=d.n<5?verdict('warn','⚠',`<strong>Amostra pequena.</strong> Continue divulgando — meta de ${GOAL} respostas.`):verdict('ok','✓',`<strong>${d.n} respostas</strong> na seleção atual.`);
-  const v2=freqP>=70?verdict('hot','🔥',`<strong>Dor muito forte.</strong> ${freqP}% com insegurança frequente; ${caseP}% tiveram caso impactado.`):freqP>=40?verdict('ok','✓',`<strong>Dor confirmada.</strong> ${freqP}% com insegurança frequente.`):verdict('warn','⚠',`<strong>Dor moderada.</strong> ${freqP}% — verifique o segmento.`);
-  const v3=d.behaviors[0]?verdict('info','→',`Concorrente real: <strong>${esc(trunc(d.behaviors[0].name,40))}</strong>. Posicione-se como mais rápido/confiável/acessível.`):verdict('warn','⚠','Sem dados de comportamento ainda.');
-  const v4=d.optPrice?verdict('ok','✓',`<strong>${d.optPrice}/caso</strong> é o ponto ótimo. Abaixo gera desconfiança; acima perde conversão.`):verdict('warn','⚠','Dados de preço insuficientes.');
-  const v5=d.contacts.length?verdict('hot','🎯',`<strong>${d.contacts.length} (${contactP}%) toparam conversar.</strong> Contate esta semana.`):verdict('warn','⚠','Sem contatos ainda.');
+  const v2=freqP>=70?verdict('hot','🔥',`<strong>Dor muito forte.</strong> ${freqP}% com insegurança frequente; ${caseP}% já tiveram caso impactado.`):freqP>=40?verdict('ok','✓',`<strong>Dor confirmada.</strong> ${freqP}% com insegurança frequente.`):verdict('warn','⚠',`<strong>Dor moderada.</strong> ${freqP}% — verifique o segmento.`);
+  const v3=d.behaviors[0]?verdict('info','→',`Concorrente real: <strong>${esc(trunc(d.behaviors[0].name,40))}</strong>. Posicione-se como mais rápido, confiável ou acessível.`):verdict('warn','⚠','Sem dados de comportamento ainda.');
+  const v4=d.optPrice?verdict('ok','✓',`<strong>${d.optPrice}/caso</strong> é o ponto ótimo. Abaixo gera desconfiança; acima perde conversão.`):verdict('warn','⚠','Dados de preço insuficientes — responda as perguntas 16 a 19.');
+  const v5=d.contacts.length?verdict('hot','🎯',`<strong>${d.contacts.length} (${contactP}%) toparam conversar.</strong> Contate esta semana.`):verdict('warn','⚠','Nenhum contato disponível ainda.');
 
   document.getElementById('app').innerHTML=`
-  <div class="hdr"><div class="hdr-logo"><div class="hdr-dot"></div><div><div class="hdr-title">Segunda Opinião Radiológica</div><div class="hdr-sub">Dashboard de Validação</div></div></div>
-    <div class="hdr-right"><div class="hdr-badge"><div><div class="hdr-n">${d.n}</div><div class="hdr-nlabel">${d.n===1?'resposta':'respostas'}${Object.values(filters).some(v=>v)?' (filtrado)':''}</div></div><div class="hdr-sep"></div><div class="hdr-live"><div class="live-dot"></div>${now||'ao vivo'}</div></div>
-    <button class="btn" onclick="fetchData()">↻ Atualizar</button></div></div>
-  ${buildFilterBar()}
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="hdr-logo"><div class="hdr-dot"></div><div><div class="hdr-title">Segunda Opinião Radiológica</div><div class="hdr-sub">Dashboard de Validação</div></div></div>
+      <div class="hdr-right">
+        <div class="hdr-badge">
+          <div><div class="hdr-n">${d.n}</div><div class="hdr-nlabel">${d.n===1?'resposta':'respostas'}${Object.values(filters).some(v=>v)?' (filtrado)':''}</div></div>
+          <div class="hdr-sep"></div>
+          <div class="hdr-live"><div class="live-dot"></div>${now||'ao vivo'}</div>
+        </div>
+        <button class="btn-refresh${isLoading?' loading':''}" onclick="fetchData()" ${isLoading?'disabled':''}>
+          <div class="spin"></div><span class="icon">↻</span> Atualizar
+        </button>
+      </div>
+    </div>
+    <div class="hdr-progress">
+      <div class="progress-track"><div class="progress-fill" style="width:${goalP}%"></div></div>
+      <div class="progress-label">
+        <strong>${totalN}</strong> de ${GOAL} respostas
+        ${remaining>0?`· <span class="remaining">faltam ${remaining}</span>`:'· <span style="color:var(--green);font-weight:600">meta atingida ✓</span>'}
+      </div>
+    </div>
+  </div>
+  ${buildFilterBar(totalN)}
   <div class="grid">
-    <div class="score-strip" style="grid-column:1/3;margin-bottom:0">
-      <div class="goalbar"><span class="goal-text"><strong>Progresso:</strong> ${rawRecords.length} de ${GOAL} respostas</span><div class="goal-track"><div class="goal-fill" style="width:${goalP}%"></div></div><span class="goal-text">${goalP}%</span></div>
-    </div>
-    ${scoreStrip(d)}
+    ${execSummary(d,totalN)}
+    ${scoreStrip(d,totalN)}
 
-    <div class="card">
-      <div class="card-head"><div class="block-badge" style="background:${B[1].b};color:${B[1].a}">1</div><div><div class="card-title">Quem está respondendo?</div><div class="card-sub">Filtro de qualidade — se são os médicos certos, o resto vale</div></div></div>
-      ${v1}${sampleWarn(d.n)}
-      <div class="narrative" style="border-color:${B[1].a}"><strong>${d.n} ${d.n===1?'médico':'médicos'}</strong> na seleção. Perfil dominante: <strong>${esc(d.profiles[0]?.name||'—')}</strong>${d.envs[0]?`, atuando em <strong>${esc(d.envs[0].name)}</strong>`:''}.</div>
-      <div class="sec">Perfil médico</div>${barList(d.profiles,B[1].a,d.n)}
-      <div class="sec">Ambiente de atuação</div>${barList(d.envs,B[1].a,d.n)}
+    <!-- BLOCO 1 — FULL WIDTH, hierarquia máxima -->
+    <div class="card-profile">
+      <div class="card-profile-left">
+        <div class="card-head" style="margin-bottom:12px">
+          <div class="block-badge" style="background:${B[1].b};color:${B[1].a};width:32px;height:32px;border-radius:10px;font-size:14px">1</div>
+          <div>
+            <div class="card-title">Quem está respondendo?</div>
+            <div class="card-sub">Este bloco valida a qualidade de tudo que vem depois — se o perfil errado respondeu, os dados perdem sentido</div>
+          </div>
+        </div>
+        <div class="profile-validity ${totalN>=GOAL?'v-ok':totalN>=10?'v-info':'v-warn'}">
+          <span>${totalN>=GOAL?'✓':totalN>=10?'→':'⚠'}</span>
+          <span>${totalN>=GOAL?`<strong>Amostra válida.</strong> ${totalN} respostas — análise confiável.`:totalN>=10?`<strong>Amostra parcial.</strong> ${totalN} respostas — insights iniciais, ampliar antes de decidir.`:`<strong>Amostra insuficiente.</strong> ${totalN} respostas — não tome decisões estratégicas ainda.`}</span>
+        </div>
+        ${sampleWarn(totalN)}
+        <div class="sec">Perfil médico dos respondentes</div>
+        ${barList(d.profiles,B[1].a,d.n)}
+      </div>
+      <div class="card-profile-right">
+        <div class="sec" style="margin-top:0">Ambiente de atuação</div>
+        ${barList(d.envs,B[1].a,d.n)}
+        ${d.avgGrad?`<div class="sec">Preparo percebido na graduação</div>
+        <div style="background:var(--inset);border-radius:10px;padding:14px 16px;border:1px solid var(--border);display:flex;align-items:center;gap:16px">
+          <div style="font-family:'Instrument Serif',serif;font-size:44px;line-height:1;color:var(--amber)">${d.avgGrad}</div>
+          <div><div style="font-size:12px;color:var(--tx3)">média / 5</div><div style="font-size:11px;color:var(--tx4);margin-top:4px">${parseFloat(d.avgGrad)<3?'Graduação considerada insuficiente — valida a tese':'Graduação considerada razoável'}</div></div>
+        </div>`:''}
+      </div>
     </div>
 
+    <!-- BLOCO 2 -->
     <div class="card">
-      <div class="card-head"><div class="block-badge" style="background:${B[2].b};color:${B[2].a}">2</div><div><div class="card-title">A dor é real?</div><div class="card-sub">Se o número for alto, o projeto faz sentido</div></div></div>
+      <div class="card-head"><div class="block-badge" style="background:${B[2].b};color:${B[2].a}">2</div><div><div class="card-title">A dor é real?</div><div class="card-sub">O número central — se for alto, o projeto faz sentido</div></div></div>
       ${v2}
       <div class="kpi-row">
         <div class="kpi"><div class="kpi-label">Insegurança frequente</div><div class="kpi-val" style="color:${B[2].a}">${freqP}<span style="font-size:18px;color:var(--tx3)">%</span></div><div class="kpi-sub">semanal ou diária</div></div>
         <div class="kpi"><div class="kpi-label">Caso com impacto</div><div class="kpi-val" style="color:var(--green)">${caseP}<span style="font-size:18px;color:var(--tx3)">%</span></div><div class="kpi-sub">afetou conduta</div></div>
-        <div class="kpi"><div class="kpi-label">Nota graduação</div><div class="kpi-val" style="color:var(--amber)">${d.avgGrad||'—'}<span style="font-size:18px;color:var(--tx3)">/5</span></div><div class="kpi-sub">preparo da faculdade</div></div>
       </div>
       <div class="sec">Exames que mais geram dúvida</div>${barList(d.exams,B[2].a,d.n)}
       ${d.worries.length?`<div class="sec">Em suas palavras</div><div class="quotes">${d.worries.slice(0,3).map(w=>`<div class="quote">"${esc(trunc(w,180))}"</div>`).join('')}</div>`:''}
     </div>
 
-    <div class="divider"><div class="div-line"></div><div class="div-label">Como resolvem hoje</div><div class="div-line"></div></div>
-
+    <!-- BLOCO 3 -->
     <div class="card">
-      <div class="card-head"><div class="block-badge" style="background:${B[3].b};color:${B[3].a}">3</div><div><div class="card-title">O que fazem hoje?</div><div class="card-sub">Concorrência real — o mais marcado é quem superar</div></div></div>
+      <div class="card-head"><div class="block-badge" style="background:${B[3].b};color:${B[3].a}">3</div><div><div class="card-title">O que fazem hoje?</div><div class="card-sub">Concorrência real — o mais marcado é quem você precisa superar</div></div></div>
       ${v3}
       <div class="sec">Como resolvem a dúvida</div>${barList(d.behaviors,B[3].a,d.n)}
       ${d.actions.length?`<div class="sec">No último caso real</div>${barList(d.actions,B[3].a,d.n)}`:''}
       ${d.stories.length?`<div class="sec">Relatos diretos</div><div class="quotes">${d.stories.slice(0,2).map(s=>`<div class="quote"><strong>${esc(trunc(s.prof,28))}:</strong> "${esc(trunc(s.desc,140))}"</div>`).join('')}</div>`:''}
     </div>
 
+    <div class="divider"><div class="div-line"></div><div class="div-label">Precificação e cliente ideal</div><div class="div-line"></div></div>
+
+    <!-- BLOCO 4 -->
     <div class="card">
       <div class="card-head"><div class="block-badge" style="background:${B[4].b};color:${B[4].a}">4</div><div><div class="card-title">Quanto pagam?</div><div class="card-sub">Defina o preço antes de lançar</div></div></div>
       ${v4}
-      ${d.vwCurve.length?`<div class="sec">Curva Van Westendorp</div>${vwChart(d)}`:'<div class="sample-warn"><span>⚠</span><span>Sem dados numéricos de preço suficientes para a curva.</span></div>'}
+      ${vwChart(d)}
       <div class="sec">Modelo de cobrança preferido</div>${barList(d.models,B[4].a,d.n)}
-      ${d.urgencies.length?`<div class="sec">Adicional por urgência</div>${barList(d.urgencies,B[4].a,d.n)}`:''}
+      ${d.urgencies.length?`<div class="sec">Adicional por urgência aceito</div>${barList(d.urgencies,B[4].a,d.n)}`:''}
     </div>
 
-    <div class="divider"><div class="div-line"></div><div class="div-label">Cliente ideal e próximos passos</div><div class="div-line"></div></div>
-
+    <!-- BLOCO 5 -->
     <div class="card">
       <div class="card-head"><div class="block-badge" style="background:${B[5].b};color:${B[5].a}">5</div><div><div class="card-title">Quem é o cliente ideal?</div><div class="card-sub">Cruzamentos — onde concentrar energia</div></div></div>
-      <div class="narrative" style="border-color:${B[5].a}">Células <strong>mais iluminadas</strong> = combinação mais frequente. Priorize esses grupos. Cinza = sem resposta.</div>
-      <div class="sec">Perfil × Frequência de insegurança</div>${heatMap(d.crossFreq,'Frequência')}
-      <div class="sec">Perfil × Intenção de uso</div>${heatMap(d.crossIntent,'Intenção')}
+      <div class="sec">Perfil × Frequência de insegurança</div>${heatMap(d.crossFreq,'Frequência',d.n)}
+      <div class="sec">Perfil × Intenção de uso</div>${heatMap(d.crossIntent,'Intenção',d.n)}
       <div class="sec">Prazo aceitável</div>${barList(d.deadlines,B[5].a,d.n)}
     </div>
 
-    <div class="card">
+    <div class="divider"><div class="div-line"></div><div class="div-label">Próximos passos</div><div class="div-line"></div></div>
+
+    <!-- BLOCO 6 -->
+    <div class="card" style="grid-column:1/3">
       <div class="card-head"><div class="block-badge" style="background:${B[6].b};color:${B[6].a}">6</div><div><div class="card-title">O que fazer agora?</div><div class="card-sub">Pipeline e ação imediata</div></div></div>
       ${v5}
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;background:var(--inset);border-radius:12px;padding:16px 20px;border:1px solid var(--border)">
-        <div style="font-family:'Instrument Serif',serif;font-size:60px;line-height:1;color:${B[6].a};flex-shrink:0">${d.contacts.length}</div>
-        <div style="border-left:1px solid var(--border2);padding-left:16px"><div style="font-size:22px;font-weight:600;color:var(--tx1)">${contactP}%</div><div style="font-size:12px;color:var(--tx3);margin-top:3px">do total toparam conversar</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div class="sec">Intenção de uso</div>${barList(d.intentions,B[6].a,d.n)}
+          ${d.indisp.length?`<div class="sec">O que tornaria indispensável</div><div class="quotes">${d.indisp.slice(0,3).map(w=>`<div class="quote">"${esc(trunc(w,180))}"</div>`).join('')}</div>`:''}
+        </div>
+        <div>
+          ${d.contacts.length?`
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;background:var(--inset);border-radius:12px;padding:16px 20px;border:1px solid var(--border)">
+            <div style="font-family:'Instrument Serif',serif;font-size:56px;line-height:1;color:${B[6].a};flex-shrink:0">${d.contacts.length}</div>
+            <div style="border-left:1px solid var(--border2);padding-left:16px"><div style="font-size:20px;font-weight:600;color:var(--tx1)">${contactP}%</div><div style="font-size:11px;color:var(--tx3);margin-top:3px">toparam conversar</div></div>
+          </div>
+          <div class="sec">Pipeline — entre em contato</div>
+          <div class="contact-list">${d.contacts.slice(0,6).map(c=>{
+            const isPhone=/^[\d\s()\-+]+$/.test(c.contact.trim()),isEmail=c.contact.includes('@');
+            const href=isPhone?'https://wa.me/55'+c.contact.replace(/\D/g,''):isEmail?'mailto:'+c.contact:'#';
+            const st=contactStatus[c.contact]||STATUS[0];
+            const stC=st==='Realizado'?'#4ADE80':st==='Agendado'?'#6B9FFF':'var(--tx3)';
+            return`<div class="contact-row">
+              <div class="c-avatar" style="background:${B[6].b};color:${B[6].a}">${esc((c.contact||'?')[0].toUpperCase())}</div>
+              <div class="c-info"><div class="c-name">${esc(c.contact)}</div><div class="c-role">${esc(trunc(c.profile,30))}</div></div>
+              <span class="c-status" style="color:${stC};border-color:${stC}" title="Clique para mudar status" onclick="cycleStatus('${esc(c.contact).replace(/'/g,"\\'")}')">${st}</span>
+              ${href!=='#'?`<a class="c-btn" href="${href}" target="_blank" style="background:${isPhone?'rgba(37,211,102,.12)':'rgba(107,159,255,.12)'};color:${isPhone?'#25D366':'#6B9FFF'};border:1px solid ${isPhone?'rgba(37,211,102,.28)':'rgba(107,159,255,.25)'}">${isPhone?'WhatsApp':'E-mail'}</a>`:''}
+            </div>`}).join('')}</div>`
+          :`<div style="padding:24px;text-align:center;color:var(--tx4);font-size:12px;font-style:italic">Nenhum contato disponível ainda.<br/>Certifique-se de que a pergunta de opt-in está no formulário.</div>`}
+        </div>
       </div>
-      <div class="sec">Intenção de uso</div>${barList(d.intentions,B[6].a,d.n)}
-      ${d.indisp.length?`<div class="sec">O que tornaria indispensável</div><div class="quotes">${d.indisp.slice(0,3).map(w=>`<div class="quote">"${esc(trunc(w,180))}"</div>`).join('')}</div>`:''}
-      ${d.contacts.length?`<div class="sec">Pipeline — entre em contato</div><div class="contact-list">${d.contacts.slice(0,8).map(c=>{
-        const isPhone=/^[\d\s()\-+]+$/.test(c.contact.trim()),isEmail=c.contact.includes('@');
-        const href=isPhone?'https://wa.me/55'+c.contact.replace(/\D/g,''):isEmail?'mailto:'+c.contact:'#';
-        const st=contactStatus[c.contact]||STATUS[0];
-        const stColor=st==='Realizado'?'#4ADE80':st==='Agendado'?'#6B9FFF':'var(--tx3)';
-        return`<div class="contact-row">
-          <div class="c-avatar" style="background:${B[6].b};color:${B[6].a}">${esc((c.contact||'?')[0].toUpperCase())}</div>
-          <div class="c-info"><div class="c-name">${esc(c.contact)}</div><div class="c-role">${esc(trunc(c.profile,30))}</div></div>
-          <span class="c-status" style="color:${stColor};border-color:${stColor}" onclick="cycleStatus('${esc(c.contact).replace(/'/g,"\\'")}')">${st}</span>
-          ${href!=='#'?`<a class="c-btn" href="${href}" target="_blank" style="background:${isPhone?'rgba(37,211,102,.12)':'rgba(107,159,255,.12)'};color:${isPhone?'#25D366':'#6B9FFF'};border:1px solid ${isPhone?'rgba(37,211,102,.28)':'rgba(107,159,255,.25)'}">${isPhone?'WhatsApp':'E-mail'}</a>`:''}
-        </div>`}).join('')}</div>`:''}
     </div>
   </div>
-  <div class="footer"><span>Segunda Opinião Radiológica · Natal/RN</span><span>Atualização automática a cada 60s</span></div>`;
-}
+  <div class="footer"><span>Segunda Opinião Radiológica · Natal/RN</span><span>Atualização automática a cada 60s</span></div>`;}
 
-function renderError(msg){document.getElementById('app').innerHTML=`<div class="state-center"><div class="state-title">Erro ao carregar</div><div class="state-sub">${esc(msg)}</div><button class="btn" style="margin-top:20px" onclick="fetchData()">↻ Tentar novamente</button></div>`}
+function renderError(msg){
+  isLoading=false;
+  document.getElementById('app').innerHTML=`<div class="state-center"><div class="state-title">Erro ao carregar</div><div class="state-sub">${esc(msg)}</div><button onclick="fetchData()" style="margin-top:20px;background:var(--inset);color:var(--tx2);border:1px solid var(--border2);border-radius:8px;padding:8px 20px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">↻ Tentar novamente</button></div>`;}
 
 function fetchData(){
+  isLoading=true;
+  // Atualiza só o botão se o dashboard já estiver renderizado
+  const btn=document.querySelector('.btn-refresh');
+  if(btn){btn.classList.add('loading');btn.disabled=true}
   Papa.parse(SHEET,{download:true,header:false,skipEmptyLines:true,
-    complete:r=>{const rows=r.data;if(!rows||rows.length<2){renderError('Planilha sem dados');return}
+    complete:r=>{
+      isLoading=false;
+      const rows=r.data;
+      if(!rows||rows.length<2){renderError('Planilha sem dados');return}
       colIdx=detectCols(rows[0]);
       rawRecords=rows.slice(1).filter(x=>x.some(c=>c&&c.trim()));
       if(!rawRecords.length){renderError('Sem respostas ainda');return}
-      lastUpdate=new Date();rerender()},
-    error:e=>renderError((e&&e.message)||'CORS bloqueado — hospede em servidor web (GitHub Pages)')});
-}
-fetchData();setInterval(fetchData,REFRESH);
+      lastUpdate=new Date();rerender();},
+    error:e=>{isLoading=false;renderError((e&&e.message)||'CORS bloqueado — abra via GitHub Pages ou servidor web')}});}
 
+fetchData();setInterval(fetchData,REFRESH);
 </script>
 </body>
 </html>
