@@ -197,13 +197,37 @@ function pct(n,t){return t>0?Math.round(n/t*100):0}
 function hexA(h,a){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return`rgba(${r},${g},${b},${a})`}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
-function splitParens(str){const p=[];let d=0,c='';for(const ch of str){if(ch==='(')d++,c+=ch;else if(ch===')')d--,c+=ch;else if(ch===','&&d===0){const t=c.trim();if(t)p.push(t);c=''}else c+=ch}const t=c.trim();if(t)p.push(t);return p}
 function limpar(s){return s.replace(/[,;\s]+$/,'').replace(/\s*\(etc\.?\)\s*$/i,'').replace(/,?\s*etc\.?\s*$/i,'').trim()}
+
+// Para multi-select do Google Forms: divide só onde a parte seguinte começa com
+// letra MAIÚSCULA ou dígito (nova opção), nunca onde começa com minúscula
+// (continuação da opção atual, ex: "livros, artigos ou internet" não divide).
+function splitMultiSelect(str){
+  if(!str)return[];
+  // Semicolon é separador confiável — usa direto
+  if(str.includes(';'))return str.split(';').map(limpar).filter(s=>s.length>1);
+  const parts=[];let cur='',i=0;
+  while(i<str.length){
+    // Verifica se há ", " aqui e o próximo char é maiúsculo/dígito
+    if(str[i]===','&&i+1<str.length&&str[i+1]===' '){
+      const nextChar=str[i+2]||'';
+      const isNewOption=nextChar&&(
+        (nextChar>='A'&&nextChar<='Z')||   // maiúsculo latino
+        (nextChar>='0'&&nextChar<='9')||   // dígito (ex: R$50)
+        nextChar==='R'                      // R$ valores
+      );
+      if(isNewOption){parts.push(cur.trim());cur='';i+=2;continue}
+    }
+    cur+=str[i];i++;
+  }
+  if(cur.trim())parts.push(cur.trim());
+  return parts.filter(s=>s.length>1);
+}
 
 function countBase(recs,idx,multi){
   if(idx<0)return[];const m={};
   recs.forEach(r=>{const v=(r[idx]||'').trim();if(!v)return;let parts;
-    if(multi){parts=v.includes(';')?v.split(';').map(limpar):splitParens(v).map(limpar);parts=parts.filter(s=>s.length>1&&!LIXO.test(s))}
+    if(multi){parts=splitMultiSelect(v).map(limpar).filter(s=>s.length>1&&!LIXO.test(s))}
     else parts=[v];
     parts.forEach(k=>{if(k.length>1)m[k]=(m[k]||0)+1})});
   return Object.entries(m).map(([name,val])=>({name,val})).sort((a,b)=>b.val-a.val);
